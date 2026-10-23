@@ -1,0 +1,283 @@
+/* Printed quotation, A4 portrait: the same paper as the editor. Cobalt title, ink rules over and under the
+   table header, a light grid between the cells. The PDF and the Excel file follow the same look. */
+@page {
+  size: A4 portrait;
+  margin: 14mm;
+}
+
+.paper-wrap {
+  background: transparent;
+  min-height: 100vh;
+  padding: 24px 0 48px;
+  overflow-x: clip; /* a phone never zooms out to a page wider than the screen */
+}
+
+.paper {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  zoom: var(--paper-zoom, 1);
+  background: #fff;
+  color: #0d1b3e;
+  padding: 14mm;
+  font-family: var(--font-ui), Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  line-height: 1.45;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(14, 42, 122, 0.08), 0 30px 60px -30px rgba(14, 42, 122, 0.45);
+}
+
+.paper .top {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+.paper .co {
+  min-width: 0;
+  max-width: 60%;
+}
+.paper .logo {
+  display: block;
+  max-height: 68px;
+  max-width: 190px;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+.paper .co-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.paper .co-line {
+  font-size: 10.5px;
+  color: #51607f;
+  white-space: pre-wrap;
+}
+.paper .doc {
+  text-align: right;
+  flex-shrink: 0;
+}
+.paper .doc-title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #1f4fd8;
+  margin-bottom: 6px;
+}
+.paper table.head {
+  border-collapse: collapse;
+  margin-left: auto;
+}
+.paper table.head td {
+  padding: 1px 0 1px 14px;
+  font-size: 11px;
+}
+.paper table.head td:first-child {
+  color: #51607f;
+  text-align: left;
+}
+.paper table.head td:last-child {
+  font-weight: 700;
+  text-align: right;
+}
+
+.paper .parties {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+.paper .lbl {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #51607f;
+  margin-bottom: 3px;
+}
+.paper .party .strong {
+  font-weight: 700;
+}
+
+.paper table.items {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.paper table.items th,
+.paper table.items td {
+  padding: 5px 6px;
+  vertical-align: middle;
+  word-wrap: break-word;
+  border-right: 1px solid #e5ecfc;
+}
+.paper table.items th:last-child,
+.paper table.items td:last-child {
+  border-right: 0;
+}
+.paper table.items th {
+  font-weight: 700;
+  font-size: 9px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #51607f;
+  border-top: 2px solid #0d1b3e;
+  border-bottom: 1px solid #0d1b3e;
+}
+.paper table.items td {
+  border-bottom: 1px solid #e5ecfc;
+}
+.paper table.items .left {
+  text-align: left;
+}
+.paper table.items .center {
+  text-align: center;
+}
+.paper table.items .right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.paper table.items td.pic {
+  padding: 3px;
+}
+.paper table.items td.pic img {
+  width: 100%;
+  max-height: 52px;
+  object-fit: contain;
+  display: block;
+}
+.paper table.items .sub {
+  color: #51607f;
+  font-size: 10px;
+}
+
+.paper table.totals {
+  border-collapse: collapse;
+  margin: 8px 0 0 auto;
+  min-width: 250px;
+}
+.paper table.totals td {
+  padding: 4px 8px;
+  font-variant-numeric: tabular-nums;
+}
+.paper table.totals td:last-child {
+  text-align: right;
+}
+.paper table.totals tr.grand td {
+  font-weight: 700;
+  font-size: 14px;
+  border-top: 2px solid #0d1b3e;
+  padding-top: 6px;
+}
+
+.paper .block {
+  margin-top: 16px;
+}
+.paper .block .txt {
+  white-space: pre-wrap;
+}
+.paper .foot {
+  margin-top: 28px;
+  padding-top: 8px;
+  border-top: 1px solid #e5ecfc;
+  font-size: 10px;
+  color: #51607f;
+  white-space: pre-wrap;
+  text-align: center;
+}
+
+/* screen-only toolbar above the paper */
+.print-toolbar {
+  width: min(210mm, calc(100% - 24px));
+  margin: 0 auto 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-ui), Inter, system-ui, sans-serif;
+  font-size: 12.5px;
+}
+.print-note {
+  width: min(210mm, calc(100% - 24px));
+  margin: -4px auto 14px;
+  font-family: var(--font-ui), Inter, system-ui, sans-serif;
+  font-size: 12.5px;
+  color: var(--q-text-2, #4a5561);
+}
+.print-note a {
+  color: var(--q-text, #0e141b);
+  font-weight: 600;
+  text-decoration: underline;
+}
+.print-toolbar .tb-link {
+  color: var(--q-accent, #1f4fd8);
+  font-weight: 600;
+  text-decoration: none;
+}
+.print-toolbar .tb-link:hover {
+  color: var(--q-text, #0f172a);
+}
+.print-toolbar .tb-title {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  color: var(--q-text, #0f172a);
+  font-size: 12px;
+}
+.print-toolbar .tb-spacer {
+  flex: 1;
+}
+.print-toolbar .tb-btn {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid var(--q-border-strong, #d5d9e0);
+  background: #fff;
+  color: var(--q-text, #0f172a);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.print-toolbar .tb-btn:hover {
+  background: var(--q-surface-alt, #fafbfc);
+}
+.print-toolbar .tb-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.print-toolbar .tb-primary {
+  background-image: var(--q-grad);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 10px 20px -10px rgba(31, 79, 216, 0.7);
+}
+.print-toolbar .tb-primary:hover {
+  filter: brightness(1.08);
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .paper-wrap {
+    background: #fff;
+    padding: 0;
+  }
+  .paper {
+    width: auto;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    zoom: 1;
+  }
+  .paper table.items tr,
+  .paper .block {
+    break-inside: avoid;
+  }
+}

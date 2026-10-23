@@ -1,0 +1,255 @@
+@import "tailwindcss";
+
+/* Message to Quote tokens (B2 Cobalt Paper). A cobalt glow with grain behind everything, glass for the nav and
+   side panels, white paper for the quotation. Green only for "matched", red only for "needs a look". */
+:root {
+  --q-bg: #f1f5ff;
+  --q-surface: #ffffff;
+  --q-surface-alt: #f6f8ff;
+  --q-chip-bg: #eef3ff;
+  --q-avatar-bg: #e2eafe;
+  --q-text: #0d1b3e;
+  --q-text-2: #3b4a6b;
+  --q-text-3: #51607f;
+  --q-text-chip: #3b4a6b;
+  --q-nav-text: #334266;
+  --q-border: #e5ecfc; /* lines, dividers, the table grid */
+  --q-border-strong: #ccd8f6; /* fields and buttons */
+  --q-row: #e5ecfc;
+  --q-accent: #1f4fd8;
+  --q-accent-pressed: #1a3fb8;
+  --q-accent-soft: #eef3ff;
+  --q-deep: #0e2a7a;
+  --q-ring: rgba(31, 79, 216, 0.18);
+  --q-grad: linear-gradient(135deg, #3b6bf5, #1f4fd8 60%, #1a3fb8);
+  --q-ai-grad: linear-gradient(135deg, #f3f6ff, #e2eafe);
+  --q-ai-border: #b9ccfa;
+  --q-cell: #f3f6ff; /* a value you can change, written on the paper */
+  --q-cell-line: #b9ccfa;
+  --q-switch-off: #c9d3ec;
+  --q-seg: #e2eafe;
+  --q-ok: #157a4a;
+  --q-ok-soft: #e6f4ec;
+  --q-danger: #c8312a;
+  --q-danger-bg: #fdecea;
+  --q-danger-border: #f4c7c3;
+}
+
+body {
+  background: var(--q-bg);
+  color: var(--q-text);
+  font-family: var(--font-ui), "Geist", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* the ground: cobalt glows, then a fine grain on top. Fixed, so it stays put while the page scrolls. */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+body::before {
+  background:
+    radial-gradient(760px 460px at 8% -10%, rgba(31, 79, 216, 0.42), transparent 62%),
+    radial-gradient(700px 520px at 92% -5%, rgba(110, 160, 255, 0.42), transparent 60%),
+    radial-gradient(900px 500px at 50% 115%, rgba(196, 214, 255, 0.9), transparent 62%),
+    var(--q-bg);
+}
+body::after {
+  opacity: 0.07;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media print {
+  body::before,
+  body::after {
+    display: none;
+  }
+}
+
+.q-mono {
+  font-family: var(--font-mono), "Geist Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* surfaces */
+.q-glass {
+  background: rgba(255, 255, 255, 0.64);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 1px 2px rgba(14, 42, 122, 0.06),
+    0 20px 44px -22px rgba(14, 42, 122, 0.35);
+}
+.q-paper {
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgba(14, 42, 122, 0.08),
+    0 30px 60px -30px rgba(14, 42, 122, 0.45);
+}
+.q-popover {
+  background: #fff;
+  border: 1px solid var(--q-border-strong);
+  box-shadow:
+    0 2px 4px rgba(14, 42, 122, 0.08),
+    0 40px 80px -28px rgba(14, 42, 122, 0.55);
+}
+
+/* buttons: the one main action per screen is the cobalt gradient; the AI's own button is sky */
+.q-pri {
+  background-image: var(--q-grad);
+  box-shadow: 0 10px 20px -10px rgba(31, 79, 216, 0.7);
+}
+.q-pri:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.q-ai-btn {
+  background-image: var(--q-ai-grad);
+  border: 1px solid var(--q-ai-border);
+  color: var(--q-accent);
+}
+.q-ai-btn:hover:not(:disabled) {
+  border-color: var(--q-accent);
+}
+.q-grad-text {
+  background-image: var(--q-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* accounting line table: an ink rule over and under the header, a light grid between the cells */
+.q-ledger {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.q-ledger th {
+  height: 34px;
+  padding: 0 8px;
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--q-text-3);
+  border-top: 2px solid var(--q-text);
+  border-bottom: 1px solid var(--q-text);
+  border-right: 1px solid var(--q-border);
+}
+.q-ledger td {
+  padding: 7px 8px;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--q-border);
+  border-right: 1px solid var(--q-border);
+}
+.q-ledger th:last-child,
+.q-ledger td:last-child {
+  border-right: 0;
+}
+
+/* a value written on the paper that you can change: light cobalt with a line under it */
+.q-cell {
+  background: var(--q-cell);
+  box-shadow: inset 0 -1px 0 var(--q-cell-line);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  outline: none;
+}
+.q-cell:hover {
+  border-color: var(--q-cell-line);
+}
+.q-cell:focus,
+.q-cell:focus-within {
+  background: #fff;
+  border-color: var(--q-accent);
+  box-shadow: 0 0 0 3px var(--q-ring);
+}
+
+/* number boxes: no browser spinner arrows, they clutter the table */
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* pictures never flash a broken box while they load */
+img.q-thumb {
+  background: var(--q-surface-alt);
+}
+
+@keyframes q-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.q-toast {
+  animation: q-rise 160ms ease-out;
+}
+@keyframes q-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.q-pop {
+  animation: q-pop 120ms ease-out;
+}
+@keyframes q-sheet {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.q-sheet {
+  animation: q-sheet 180ms ease-out;
+}
+/* Add with AI: rises as a sheet on a phone, drops from its button on a computer */
+.q-ai-pop {
+  animation: q-sheet 180ms ease-out;
+}
+@media (min-width: 1024px) {
+  .q-ai-pop {
+    animation: q-pop 120ms ease-out;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .q-toast,
+  .q-pop,
+  .q-sheet,
+  .q-ai-pop {
+    animation: none;
+  }
+}
+
+/* iPhone and iPad zoom the whole page into any text box under 16px, and stay zoomed after leaving it.
+   16px there stops that. Only iOS matches this test, so other devices keep the design sizes. */
+@supports (-webkit-touch-callout: none) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
