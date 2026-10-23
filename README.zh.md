@@ -14,7 +14,7 @@
 
 > 帮我 set up 这个 app：https://github.com/ameng-nocode/message-to-quote
 
-（`OWNER` 换成放这个 repo 的 GitHub 账号。）AI 会照 [AGENTS.md](AGENTS.md) 一步一步做：指令它自己跑，只有几件一定要人做的事才会停下来叫你，例如拿一个免费的 AI key。它不会叫你把 key 贴在聊天里，会帮你打开 `.env` 档案，你自己贴进去。
+AI 会把 repo 下载到那个 folder，再照 [AGENTS.md](AGENTS.md) 一步一步做：指令它自己跑，只有几件一定要人做的事才会停下来叫你，例如拿一个免费的 AI key。它不会叫你把 key 贴在聊天里，会帮你打开 `.env` 档案，你自己贴进去。
 
 ## 它会做什么
 

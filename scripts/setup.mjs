@@ -65,7 +65,7 @@ function ensureEnvFile() {
 
 function checkNode() {
   const [maj, min] = process.versions.node.split(".").map(Number);
-  if (maj < 20 || (maj === 20 && min < 12)) fail(`Node.js ${process.versions.node} is too old. Install Node.js 22 or newer from https://nodejs.org, then run this again.`);
+  if (maj < 20 || (maj === 20 && min < 12)) fail(`Node.js ${process.versions.node} is too old. Install Node.js 22 or newer (20.12 also works) from https://nodejs.org, then run this again.`);
   ok(`Node.js ${process.versions.node}`);
 }
 
@@ -258,7 +258,7 @@ function setupLocal() {
   ok(sb ? "mode: Supabase (login + shared data)" : "mode: browser (no login, data stays in this browser)");
   if (ai) {
     console.log("\nReady. Run: npm run dev   then open http://localhost:3000");
-    if (!sb) info("For login and a team, run: npm run setup:supabase");
+    if (!sb) info("For login and a team, run: npm run setup:supabase -- --owner-email you@example.com   (the email the owner signs in with)");
   }
 }
 

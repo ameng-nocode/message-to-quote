@@ -13,13 +13,17 @@ When someone asks you to set up, run or install this app, follow this guide. Ass
 
 ## Steps
 
-1. **Node.js.** Run `node --version`. It must be 20.12 or newer (22 or 24 is best).
+0. **Get the code.** If this folder does not have the app yet: `git clone https://github.com/ameng-nocode/message-to-quote`, then work inside
+   the new `message-to-quote` folder. No Git? Download the ZIP from the GitHub page (Code, Download ZIP) and unzip it.
+1. **Node.js.** Run `node --version`. It must be 22 or newer (20.12 also works).
    If it is missing or older: HUMAN STEP, install the LTS version from https://nodejs.org, then reopen the terminal.
 2. **Packages.** `npm install`
-   It prints deprecation warnings and a few "vulnerabilities" (inside Next.js's own build tools and the Excel library).
-   They do not affect how this app runs; tell them it is normal. Do not run `npm audit fix --force`: it installs major versions the app was not built for.
+   It prints deprecation warnings and a few "vulnerabilities", some marked high or critical (inside Next.js's own build tools,
+   the Excel library and the test tools). They do not affect how this app runs; tell them it is normal.
+   Do not run `npm audit fix` or `npm audit fix --force`: they change package versions the app was tested with.
+   `npm install` may also change one line in `package-lock.json` (a different npm version). That is harmless.
 3. **Basic setup.** `npm run setup` and follow what it prints (it exits normally even when a HUMAN STEP is waiting, so read the text).
-   It makes `.env` and checks for an AI key. If it asks for one (HUMAN STEP): the free option is Gemini at
+   It makes `.env` and checks for an AI key. It says "mode: browser" until Supabase is set up; that is normal, the mode is picked in step 4. If it asks for one (HUMAN STEP): the free option is Gemini at
    https://aistudio.google.com/apikey. Open `.env` for them, they paste the key after `GEMINI_API_KEY=`, then run `npm run setup` again.
    While they get the key you may already start the app (step 6) so they can look around: only Add with AI needs the key.
    The app reads `.env` when it starts, so restart `npm run dev` after the key is saved.
@@ -38,10 +42,13 @@ When someone asks you to set up, run or install this app, follow this guide. Ass
    - The script makes the project, the tables, the security rules, the picture storage and the login settings,
      writes the keys into `.env`, and empties the access token again. Tell them they can revoke the token afterwards.
    - Region: Singapore (`ap-southeast-1`) by default. Another one: `npm run setup:supabase -- --region eu-central-1`.
-6. **Start it.** Run `npm run dev` in the background and open http://localhost:3000 for them.
+6. **Start it.** Run `npm run dev` in the background and open http://localhost:3000 in their browser for them
+   (Windows `start http://localhost:3000`, macOS `open http://localhost:3000`, Linux `xdg-open http://localhost:3000`).
    If port 3000 is taken: `npm run dev -- -p 3001` and open that port instead.
 7. **First use.**
    - Supabase mode: the page asks them to create the owner account, with the owner email from step 5.
+   - Try it first: Quotations page, **Load sample data** (an invented phone shop wholesaler), then drop one of the screenshots
+     from `demo-data/whatsapp/` on the import box. This shows the whole flow in one minute.
    - Settings: company name, logo, address, bank details, tax, number prefix.
    - Products: import their price list from Excel (one row per product: `code, name, variant, category, unit, price`,
      plus one column per price list) or click Load sample data to try it first.

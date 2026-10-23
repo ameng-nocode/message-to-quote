@@ -101,9 +101,9 @@ type Ctx = AssistRequest["context"];
 
 function buildMessages(msg: string, images: string[], context: Ctx, catalog: CatalogItem[], withDetail: boolean): Msg[] {
   const linesText =
-    context.lines.length === 0
+    !(context.lines || []).length
       ? "The quotation has no lines yet."
-      : "Lines already on the quotation:\n" + context.lines.map((l, i) => `${i + 1}. ${cut(l.productId, 80)} qty ${Number(l.qty) || 0} unit price ${Number(l.unitPrice) || 0}`).join("\n");
+      : "Lines already on the quotation:\n" + (context.lines || []).map((l, i) => `${i + 1}. ${cut(l.productId, 80)} qty ${Number(l.qty) || 0} unit price ${Number(l.unitPrice) || 0}`).join("\n");
   const img = (url: string, detail: "low" | "high"): Part => ({ type: "image_url", image_url: withDetail ? { url, detail } : { url } });
   const saved = (context.customers || []).slice(0, 300);
   const customersText = saved.length

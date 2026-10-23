@@ -1,6 +1,7 @@
 {
   "name": "message-to-quote",
   "version": "1.0.0",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "node node_modules/next/dist/bin/next dev",

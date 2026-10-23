@@ -14,7 +14,7 @@ Open [Claude Code](https://claude.com/claude-code) (or Codex, Cursor, any coding
 
 > Set up this app for me: https://github.com/ameng-nocode/message-to-quote
 
-(Replace `OWNER` with the GitHub account that hosts this repo.) The agent follows [AGENTS.md](AGENTS.md): it runs every command itself and only stops for the few things a person must do, such as getting a free AI key. It never asks you to paste a key into the chat; it opens the `.env` file for you instead.
+The agent downloads the repo into that folder and follows [AGENTS.md](AGENTS.md): it runs every command itself and only stops for the few things a person must do, such as getting a free AI key. It never asks you to paste a key into the chat; it opens the `.env` file for you instead.
 
 ## What it does
 
@@ -51,7 +51,7 @@ The app picks the mode by itself: no Supabase keys in `.env` means browser mode.
 
 ## Set it up by hand
 
-You need [Node.js](https://nodejs.org) 22 or newer (20.12 works) and [Git](https://git-scm.com).
+You need [Node.js](https://nodejs.org) 22 or newer (20.12 also works) and [Git](https://git-scm.com).
 
 ```bash
 git clone https://github.com/ameng-nocode/message-to-quote.git
