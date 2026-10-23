@@ -54,7 +54,7 @@ When someone asks you to set up, run or install this app, follow this guide. Ass
      plus one column per price list) or click Load sample data to try it first.
    - Team (Supabase mode, Settings, Team): the owner adds a colleague's email. The colleague opens the app and chooses
      "Invited? Create your account" with that same email.
-8. **Check anytime.** `npm run setup:check` prints the mode, the AI key, and whether the tables and the owner account exist.
+8. **Check anytime.** `npm run setup:check` prints the mode, the AI key, whether the tables and the owner account exist, and the live address.
 
 ## When something goes wrong
 
@@ -67,18 +67,24 @@ When someone asks you to set up, run or install this app, follow this guide. Ass
 | "No access yet" after signing in | Same: the owner invites that email, then they sign in again. |
 | Forgot password email never comes | Supabase's built-in email sends only a few per hour. Wait, or set up SMTP in the Supabase dashboard. |
 | `npm install` fails with `esbuild.exe ENOENT` | Antivirus removed a program file (it happens in Temp or Downloads). Move the folder somewhere normal like `C:\message-to-quote`, run `npm install` again. The app itself does not need esbuild (only `npm test` does), so `npm install --ignore-scripts` also gets it running. |
+| Live site shows 404 | `vercel.json` is missing (it tells Vercel this is Next.js). Restore it from the repo, `npm run deploy` again. |
+| Add with AI online says "photos are too big" | Vercel takes at most 4.5 MB per request. Send fewer photos at once. |
 | `npm install` fails on the `supabase` package | Its download was blocked. Browser mode still works: `npm install --ignore-scripts`, and do Supabase later. |
 | Windows: "cannot find" a file, or a path error, on install or start | The folder sits too deep (Windows stops at 260 characters). Move it somewhere short like `C:\message-to-quote`, run `npm install` again. |
 | "Not saved" in browser mode | The browser is full (about 5 MB, mostly photos). Use smaller photos, or move to Supabase mode. |
 
 ## Putting it online (only if they ask)
 
-Online means Supabase mode. Before you deploy, check all of these:
-1. `npm run setup:check` says `owner email lock: on`. If it says OFF, run `npm run setup:supabase -- --owner-email <email>` first.
-2. The owner account is created (setup:check: `owner account: yes`).
-3. Vercel: import the GitHub repo, add the keys from `.env` under Environment Variables: the AI key and the two
-   `NEXT_PUBLIC_SUPABASE_` keys. Never add `SUPABASE_DB_PASSWORD` or the access token: the app does not need them.
-4. In the Supabase dashboard, Authentication, URL Configuration: set Site URL to the live address, so password reset links point to it.
+Online means Supabase mode. If they are in browser mode, do step 5 first.
+1. Better first: the owner account is created (setup:check: `owner account: yes`), so nobody can claim it.
+2. `npm run deploy` and follow what it prints. It checks the owner email lock, makes the Vercel project, sends only the
+   settings the app needs (never `SUPABASE_DB_PASSWORD` or the access token), deploys, sets Supabase's Site URL to the
+   live address and checks the site. Safe to run again after every change.
+   - HUMAN STEP, sign in to Vercel: ask them to run `npx vercel login` in a terminal (it opens the browser, they click),
+     or run it yourself in the background and tell them to click in the browser window. Then run `npm run deploy` again.
+   - "Pick the Vercel team": show them the names it lists, ask which one, run again with `-- --team <slug>`.
+   - Another project name: `npm run deploy -- --name <name>` (first run only; it is saved in `.env`).
+3. Open the live address it prints for them and let them sign in with the owner email.
 
 Browser mode (no login) online: Add with AI refuses to answer, because anyone with the link would spend their AI credit.
 Only if they insist and understand that, `ALLOW_PUBLIC_AI=1` turns it on (then `ASSIST_LIMIT_PER_HOUR` per visitor still applies).

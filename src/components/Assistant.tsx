@@ -221,7 +221,7 @@ export default function Assistant({
         method: "POST",
         headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         // product pictures only go along when there is a photo to compare them with
-        body: JSON.stringify({ message: m, images: imgs, context: { ...getContext(), history: history.current.slice(-6), thumbs: imgs.length ? await productThumbs(products.all()) : undefined } }),
+        body: JSON.stringify({ message: m, images: imgs, context: { ...getContext(), history: history.current.slice(-6), thumbs: imgs.length ? await productThumbs(products.all(), 3_500_000 - imgs.reduce((n, s) => n + s.length, 0)) : undefined } }),
       });
       const data = (await res.json()) as AssistResult & { error?: string };
       if (!res.ok || data.error) {

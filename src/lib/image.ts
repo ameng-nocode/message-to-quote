@@ -42,7 +42,8 @@ export const imageFiles = (files: FileList | File[] | null | undefined) => Array
 
 /** Small copies of product pictures for the AI to compare a customer's photo with. Made once per picture, kept in memory. */
 const thumbCache = new Map<string, Promise<string | null>>();
-export async function productThumbs(list: { id: string; photo: string }[]): Promise<{ id: string; src: string }[]> {
+/** Small product pictures for the AI, up to `budget` characters in all (hosts like Vercel refuse requests over 4.5 MB). */
+export async function productThumbs(list: { id: string; photo: string }[], budget = Infinity): Promise<{ id: string; src: string }[]> {
   const out = await Promise.all(
     list
       .filter((p) => p.photo)
@@ -58,5 +59,12 @@ export async function productThumbs(list: { id: string; photo: string }[]): Prom
         return src ? { id: p.id, src } : null;
       }),
   );
-  return out.filter((x): x is { id: string; src: string } => Boolean(x));
+  const kept: { id: string; src: string }[] = [];
+  let used = 0;
+  for (const t of out) {
+    if (!t || used + t.src.length > budget) continue;
+    used += t.src.length;
+    kept.push(t);
+  }
+  return kept;
 }

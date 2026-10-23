@@ -1,0 +1,9 @@
+# What `npm run deploy` never uploads. The settings the app needs go to Vercel separately (only those, see scripts/setup.mjs).
+.env
+.env.*
+!.env.example
+node_modules
+.next
+supabase/.temp
+supabase/.branches
+*.log

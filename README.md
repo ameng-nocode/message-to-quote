@@ -152,11 +152,23 @@ Change the order with `ASSIST_PROVIDERS=gemini,openai,openrouter` and the models
 
 ## Put it online
 
-Online means Supabase mode. First run `npm run setup:check`: it must say `owner email lock: on` and `owner account: yes`.
+Online means Supabase mode (login), so do the Supabase setup first. Then the easiest way is Vercel (free account):
 
-Vercel is the simplest: import the repo, add the AI key and the two `NEXT_PUBLIC_SUPABASE_` keys from your `.env` under Environment Variables, deploy. Do not add the database password or the access token: the app does not need them. Any host that runs Next.js works (Railway, Render, your own server with `npm run build && npm start`).
+**Let your AI do it.** Say "put it online on Vercel". It runs:
 
-Then set the live address as Site URL in the Supabase dashboard (Authentication, URL Configuration).
+```bash
+npm run deploy
+```
+
+It checks the owner email lock is on, makes the Vercel project, sends only the settings the app needs (the AI key and the two `NEXT_PUBLIC_SUPABASE_` values, never the database password or the access token), builds it, points Supabase's password reset links to the live address and checks the site answers. The only thing you do: sign in to Vercel once when it asks (`npx vercel login`). Run it again after changes.
+
+**Or click.** After `npm run setup:supabase` on your computer:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fameng-nocode%2Fmessage-to-quote&project-name=message-to-quote&env=GEMINI_API_KEY,NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY&envDescription=The%20AI%20key%20and%20the%20two%20Supabase%20values%20from%20your%20.env%20(after%20npm%20run%20setup%3Asupabase)&envLink=https%3A%2F%2Fgithub.com%2Fameng-nocode%2Fmessage-to-quote%23put-it-online)
+
+Vercel asks for three values: copy them from your `.env` (`GEMINI_API_KEY`, or use `OPENAI_API_KEY` instead, plus the two `NEXT_PUBLIC_SUPABASE_` ones). Then in the Supabase dashboard (Authentication, URL Configuration) set Site URL to your Vercel address.
+
+The server runs in Singapore (`vercel.json`, next to Supabase's default region). Other hosts that run Next.js also work (Railway, Render, your own server with `npm run build && npm start`).
 
 Browser mode online has no login, so Add with AI stays off there (anyone with the link would spend your AI credit). `ALLOW_PUBLIC_AI=1` in the host's settings turns it on anyway, at your own risk.
 

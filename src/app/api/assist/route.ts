@@ -218,7 +218,7 @@ function localHost(req: Request): boolean {
   );
 }
 
-const MAX_BODY = 8_000_000; // bytes: 4 phone screenshots, shrunk by the browser first, are far below this
+const MAX_BODY = 4_500_000; // bytes: Vercel's own limit; the browser shrinks photos and caps product pictures to stay below it
 const MAX_IMAGE = 3_000_000; // characters of one picture's data URL
 
 export async function POST(req: Request) {

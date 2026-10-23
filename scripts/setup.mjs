@@ -10,9 +10,10 @@
 // Lines starting with "HUMAN STEP" are things only a person can do. Everything else this script does itself.
 
 import { spawnSync } from "node:child_process";
-import { copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
-import { dirname, resolve } from "node:path";
+import { tmpdir } from "node:os";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -122,6 +123,25 @@ function json(out) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/** Login settings from supabase/config.toml. With the live address (after `npm run deploy`), password reset links
+    point there instead of localhost; localhost stays allowed for `npm run dev`. The file in the repo is not changed. */
+function pushConfig(ref, siteUrl) {
+  const dir = mkdtempSync(join(tmpdir(), "mtq-config-"));
+  try {
+    let toml = readFileSync(resolve(ROOT, "supabase", "config.toml"), "utf8");
+    if (siteUrl) {
+      toml = toml
+        .replace(/^site_url\s*=.*$/m, `site_url = "${siteUrl}"`)
+        .replace(/^additional_redirect_urls\s*=.*$/m, `additional_redirect_urls = ["${siteUrl}", "http://localhost:3000", "http://127.0.0.1:3000"]`);
+    }
+    mkdirSync(join(dir, "supabase"));
+    writeFileSync(join(dir, "supabase", "config.toml"), toml);
+    return cli(["config", "push", "--project-ref", ref, "--workdir", dir, "--yes"]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 async function setupSupabase() {
@@ -214,7 +234,7 @@ async function setupSupabase() {
         (password ? "" : `\nIf it asks for a password: open .env, paste the database password after SUPABASE_DB_PASSWORD= (reset it at https://supabase.com/dashboard/project/${ref}/database/settings), and run again.`),
     );
   ok("tables, security rules and picture storage are in place");
-  const conf = cli(["config", "push", "--project-ref", ref, "--yes"]);
+  const conf = pushConfig(ref, env.SITE_URL);
   if (conf.code !== 0) info(`login settings were not pushed (${conf.out.trim().split("\n").pop()}). In the dashboard, Authentication, Sign In / Providers, Email: turn off "Confirm email".`);
   else ok("login settings: email + password, no confirmation email");
 
@@ -272,6 +292,7 @@ async function check() {
   const key = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return console.log("mode: browser (no Supabase keys)");
   console.log(`mode: Supabase (${url})`);
+  console.log(`online: ${env.SITE_URL || "not yet (npm run deploy puts it on Vercel)"}`);
   try {
     const r = await fetch(`${url.replace(/\/$/, "")}/rest/v1/rpc/has_owner`, { method: "POST", headers: { apikey: key, "Content-Type": "application/json" }, body: "{}" });
     if (r.status === 404) return console.log("tables: missing (run npm run setup:supabase)");
@@ -285,6 +306,129 @@ async function check() {
   }
 }
 
+/* ---------- npm run deploy: put the app online on Vercel ---------- */
+
+// what the app reads on the server; the database password and the access token never leave this computer
+const DEPLOY_KEYS = [
+  "NEXT_PUBLIC_SUPABASE_URL",
+  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+  "OPENAI_API_KEY",
+  "GEMINI_API_KEY",
+  "OPENROUTER_API_KEY",
+  "ASSIST_PROVIDERS",
+  "ASSIST_MODEL_OPENAI",
+  "ASSIST_MODEL_GEMINI",
+  "ASSIST_MODEL_OPENROUTER",
+  "ASSIST_LIMIT_PER_HOUR",
+];
+const SECRET_KEYS = new Set(["OPENAI_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY"]);
+const VERCEL = "vercel@65.2.0";
+
+function vercel(vArgs, input) {
+  // npx through the shell: on Windows npx is a .cmd file. Values only ever go in through stdin, never the command line.
+  const r = spawnSync(`npx --yes ${VERCEL} ${vArgs.map((a) => (/^[\w@./:=-]+$/.test(a) ? a : JSON.stringify(a))).join(" ")}`, {
+    cwd: ROOT,
+    encoding: "utf8",
+    shell: true,
+    input,
+    env: { ...process.env, VERCEL_TELEMETRY_DISABLED: "1" },
+  });
+  return { code: r.status ?? 1, out: (r.stdout || "") + (r.stderr || ""), stdout: r.stdout || "" };
+}
+
+async function deploy() {
+  checkNode();
+  checkInstall();
+  const env = readEnv();
+  if (!aiKeys(env).length) fail("Add an AI key first. Run: npm run setup");
+  const url = (env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/$/, "");
+  const anon = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anon)
+    fail("Online needs login, so it needs Supabase mode first (browser mode would let anyone in).\nRun: npm run setup:supabase -- --owner-email you@example.com");
+  const locked = await fetch(`${url}/rest/v1/rpc/owner_locked`, { method: "POST", headers: { apikey: anon, "Content-Type": "application/json" }, body: "{}" })
+    .then((r) => (r.ok ? r.json() : null))
+    .catch(() => null);
+  if (locked !== true) fail("The owner account is not locked to an email yet, so a stranger could claim it once the app is online.\nRun: npm run setup:supabase -- --owner-email you@example.com");
+  ok("Supabase mode, owner email locked");
+
+  // 1. signed in to Vercel?
+  const who = vercel(["whoami"]);
+  if (who.code !== 0) {
+    human(
+      [
+        "Sign in to Vercel (one time). Free account: https://vercel.com/signup",
+        "Run this in a terminal and click the button in the browser it opens:",
+        "  npx vercel login",
+        "Then run: npm run deploy",
+      ].join("\n"),
+    );
+    process.exit(1);
+  }
+  ok(`signed in to Vercel as ${who.stdout.trim().split(/\r?\n/).pop()}`);
+
+  // 2. which Vercel team (account) it goes in: the only one, or the one the person picks
+  let team = flag("team", env.VERCEL_TEAM || "");
+  if (!team) {
+    const teams = json(vercel(["teams", "ls", "--format", "json"]).stdout)?.teams || [];
+    if (teams.length === 1) team = teams[0].slug;
+    else
+      fail(
+        `Pick the Vercel team (account) to put the app in, then run again with --team:\n${teams.map((t) => `  ${t.slug}  ${t.name}`).join("\n") || "  (none found)"}\nExample: npm run deploy -- --team ${teams[0]?.slug || "<team>"}`,
+      );
+  }
+  writeEnv({ VERCEL_TEAM: team });
+  const scope = ["--scope", team];
+
+  // 3. the project (made on the first run, linked after that)
+  const name = flag("name", env.VERCEL_PROJECT || "message-to-quote").toLowerCase().replace(/[^a-z0-9-]/g, "-");
+  if (!existsSync(resolve(ROOT, ".vercel", "project.json"))) {
+    const made = vercel(["project", "create", name, ...scope]);
+    if (made.code !== 0 && !/already exists|exists/i.test(made.out)) fail(`Could not make the Vercel project:\n${made.out.slice(-600)}`);
+    const link = vercel(["link", "--yes", "--project", name, ...scope]);
+    if (link.code !== 0) fail(`Could not link the Vercel project:\n${link.out.slice(-600)}`);
+  }
+  writeEnv({ VERCEL_PROJECT: name });
+  ok(`Vercel project: ${name} (${team})`);
+
+  // 4. the settings the app needs, from .env (only these, values through stdin)
+  const sent = [];
+  for (const k of DEPLOY_KEYS) {
+    const v = (env[k] || "").trim();
+    if (!v) continue;
+    const r = vercel(["env", "add", k, "--environment", "production", "--force", "--yes", SECRET_KEYS.has(k) ? "--sensitive" : "--no-sensitive", ...scope], v);
+    if (r.code !== 0) fail(`Could not save ${k} in Vercel:\n${r.out.replaceAll(v, "***").slice(-400)}`);
+    sent.push(k);
+  }
+  ok(`settings sent: ${sent.join(", ")}`);
+
+  // 5. build and put it online
+  info("building and putting it online (takes 1 to 3 minutes)");
+  const dep = vercel(["deploy", "--prod", "--yes", ...scope]);
+  if (dep.code !== 0) fail(`The deploy did not work:\n${dep.out.slice(-1200)}`);
+  // the stable address of the project, not the one-off deployment address
+  const insp = vercel(["project", "inspect", name, ...scope]);
+  const domains = [...new Set([...(insp.out + dep.out).matchAll(/https?:\/\/([a-z0-9-]+(\.[a-z0-9-]+)*\.vercel\.app)/gi)].map((m) => m[1].toLowerCase()))];
+  const live = `https://${domains.find((d) => d === `${name}.vercel.app`) || domains.find((d) => d.startsWith(name) && !/-[a-z0-9]{9}-/.test(d)) || domains[0] || `${name}.vercel.app`}`;
+  writeEnv({ SITE_URL: live });
+  ok(`online: ${live}`);
+
+  // 6. password reset links point to the live address
+  const ref = env.SUPABASE_PROJECT_REF;
+  if (ref) {
+    const conf = pushConfig(ref, live);
+    if (conf.code === 0) ok("Supabase login settings point to the live address");
+    else info(`Could not update Supabase's Site URL (${conf.out.trim().split("\n").pop()}). In the Supabase dashboard, Authentication, URL Configuration: set Site URL to ${live}`);
+  } else info(`In the Supabase dashboard, Authentication, URL Configuration: set Site URL to ${live}`);
+
+  // 7. quick check from the outside
+  const page = await fetch(`${live}/login`).then((r) => r.status).catch(() => 0);
+  const ai = await fetch(`${live}/api/assist`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).then((r) => r.status).catch(() => 0);
+  if (page === 200 && ai === 401) ok("checked: the page opens, Add with AI refuses anyone not signed in");
+  else info(`check by hand: login page answered ${page}, AI without login answered ${ai} (expected 200 and 401)`);
+  console.log(`\nOnline: ${live}\nOpen it, sign in with the owner email. Run npm run deploy again after changes.`);
+}
+
 if (command === "supabase") await setupSupabase();
+else if (command === "deploy") await deploy();
 else if (command === "check") await check();
 else setupLocal();

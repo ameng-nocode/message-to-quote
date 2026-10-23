@@ -152,11 +152,23 @@ npm run setup:supabase -- --owner-email you@example.com
 
 ## 放上网
 
-放上网就要用 Supabase 模式。先跑 `npm run setup:check`：要看到 `owner email lock: on` 和 `owner account: yes`。
+放上网就要有 login，所以先做好 Supabase 模式。然后最简单是 Vercel（免费账号）：
 
-最简单是 Vercel：import 这个 repo，把 `.env` 里的 AI key 和两个 `NEXT_PUBLIC_SUPABASE_` key 放进 Environment Variables，deploy。不要放 database password 和 access token，app 用不到。任何跑得到 Next.js 的地方都可以（Railway、Render、自己的 server 用 `npm run build && npm start`）。
+**叫你的 AI 做。** 跟它讲「帮我放上 Vercel」，它会跑：
 
-然后在 Supabase dashboard（Authentication，URL Configuration）把 Site URL 设成你的网址。
+```bash
+npm run deploy
+```
+
+它会检查 owner email 有锁好，开 Vercel project，只放 app 要用的设定（AI key 和两个 `NEXT_PUBLIC_SUPABASE_`，database password 和 access token 永远不放），build 好放上网，把 Supabase 忘记密码的 link 改成你的网址，再检查网站有没有开到。你只要做一件事：它叫你的时候 login 一次 Vercel（`npx vercel login`）。改了东西就再跑一次。
+
+**或者按按钮。** 先在自己电脑跑好 `npm run setup:supabase`：
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fameng-nocode%2Fmessage-to-quote&project-name=message-to-quote&env=GEMINI_API_KEY,NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY&envDescription=The%20AI%20key%20and%20the%20two%20Supabase%20values%20from%20your%20.env%20(after%20npm%20run%20setup%3Asupabase)&envLink=https%3A%2F%2Fgithub.com%2Fameng-nocode%2Fmessage-to-quote%23put-it-online)
+
+Vercel 会问三个值，从你的 `.env` 复制（`GEMINI_API_KEY`，或者改用 `OPENAI_API_KEY`，加两个 `NEXT_PUBLIC_SUPABASE_`）。然后在 Supabase dashboard（Authentication，URL Configuration）把 Site URL 设成你的 Vercel 网址。
+
+Server 放在新加坡（`vercel.json`，跟 Supabase 默认的地区一样）。其他跑得到 Next.js 的地方也可以（Railway、Render、自己的 server 用 `npm run build && npm start`）。
 
 Browser 模式放上网没有 login，所以 Add with AI 会关掉（不然有 link 的人都可以用你的 AI credit）。真的要开的话，在 host 的设定加 `ALLOW_PUBLIC_AI=1`，风险自己负责。
 

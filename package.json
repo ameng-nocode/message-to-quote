@@ -10,6 +10,7 @@
     "setup": "node scripts/setup.mjs",
     "setup:supabase": "node scripts/setup.mjs supabase",
     "setup:check": "node scripts/setup.mjs check",
+    "deploy": "node scripts/setup.mjs deploy",
     "test": "vitest run"
   },
   "dependencies": {
